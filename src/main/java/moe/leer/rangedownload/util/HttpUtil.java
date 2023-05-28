@@ -1,6 +1,6 @@
 package moe.leer.rangedownload.util;
 
-import moe.leer.rangedownload.FileInfo;
+import moe.leer.rangedownload.model.FileInfo;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -24,9 +24,19 @@ public final class HttpUtil {
     public static long getHttpContentLength(String url) throws Exception {
         HttpRequest request = HttpRequest.newBuilder()
                 .method("HEAD", HttpRequest.BodyPublishers.noBody())
+                .header("Want-Digest", "SHA-256")
                 .uri(new URI(URLUtil.encodeURL(url))).build();
         HttpResponse<String> res = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println(res.headers());
         return res.headers().firstValueAsLong("Content-Length").orElse(0L);
+    }
+
+    public static void main(String[] args) {
+        try {
+            System.out.println(getHttpContentLength("https://testingcf.jsdelivr.net/gh/nj-lizhi/song@main/audio/1701/大象.mp3"));
+        } catch (Exception e) {
+            logger.error("main error: %s", e);
+        }
     }
 
     public static Optional<FileInfo> getHttpFileInfo(String url, String dir) {
@@ -46,18 +56,19 @@ public final class HttpUtil {
         }
     }
 
-    public static HttpRequest buildRangeDownloadRequest(String url, long start, long end) {
+    public static Optional<HttpRequest> buildRangeDownloadRequest(String url, long start, long end) {
         try {
             String range = String.format("bytes=%d-%d", start, end);
             if (end == -1) {
                 range = String.format("bytes=%d-", start);
             }
-            return HttpRequest.newBuilder()
+            return Optional.ofNullable(HttpRequest.newBuilder()
                     .uri(new URI(URLUtil.encodeURL(url)))
                     .header("Range", range)
-                    .build();
+                    .build());
         } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+            logger.error("buildRangeDownloadRequest error: %s", e);
+            return Optional.empty();
         }
     }
 

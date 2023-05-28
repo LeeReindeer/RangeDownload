@@ -1,4 +1,4 @@
-package moe.leer.rangedownload;
+package moe.leer.rangedownload.model;
 
 public enum TaskStatus {
     SUBMITTED,

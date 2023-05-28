@@ -4,13 +4,14 @@ import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@SuppressWarnings("rawtypes")
 public final class Logger {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static boolean isDebug = false;
 
-    private Class clazz;
+    private final Class clazz;
 
     public Logger(Class clazz) {
         this.clazz = clazz;
